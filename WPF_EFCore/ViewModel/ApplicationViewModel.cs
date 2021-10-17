@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -21,8 +22,8 @@ namespace WPF_EFCore.ViewModel
             {
                 selectedClient = value;
 
-                BankAccountsView = new List<BankAccount>();
-                List<BankAccount> AccTemp = new List<BankAccount>();
+                BankAccountsView = new ObservableCollection<BankAccount>();
+                ObservableCollection<BankAccount> AccTemp = new ObservableCollection<BankAccount>();
                 foreach (var item in BankAccounts)
                 {
                     if (item.ClientId == value.Id) AccTemp.Add(item);
@@ -90,6 +91,7 @@ namespace WPF_EFCore.ViewModel
                 {
                     if (SelectedAccFrom == null || SelectedAccTo == null) return;
                     TransactionMoney(SelectedAccFrom, SelectedAccTo, 50);
+
                 }));
             }
         }
@@ -112,7 +114,7 @@ namespace WPF_EFCore.ViewModel
 
                     var temp = BankAccountsView;
                     temp.Remove(bankAccount);
-                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = new ObservableCollection<BankAccount>();
                     BankAccountsView = temp;
                 }));
             }
@@ -145,7 +147,7 @@ namespace WPF_EFCore.ViewModel
 
                     var temp = BankAccountsView;
                     temp.Add(newAcc);
-                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = new ObservableCollection<BankAccount>();
                     BankAccountsView = temp;
                 }));
             }
@@ -178,7 +180,7 @@ namespace WPF_EFCore.ViewModel
 
                     var temp = BankAccountsView;
                     temp.Add(newAcc);
-                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = new ObservableCollection<BankAccount>();
                     BankAccountsView = temp;
                 }));
             }
@@ -197,13 +199,13 @@ namespace WPF_EFCore.ViewModel
         /// <summary>
         /// Коллекция всех счетов банка
         /// </summary>
-        public List<BankAccount> BankAccounts { get; set; }
+        public ObservableCollection<BankAccount> BankAccounts { get; set; }
 
         /// <summary>
         /// Коллекция счетов банка отображенных в ListBox
         /// </summary>
-        private List<BankAccount> bankAccountsView;
-        public List<BankAccount> BankAccountsView
+        private ObservableCollection<BankAccount> bankAccountsView;
+        public ObservableCollection<BankAccount> BankAccountsView
         {
             get { return bankAccountsView; }
             set
@@ -246,9 +248,9 @@ namespace WPF_EFCore.ViewModel
         /// Возвращает счета из бд
         /// </summary>
         /// <returns></returns>
-        private List<BankAccount> GetBankAccountsFromDB()
+        private ObservableCollection<BankAccount> GetBankAccountsFromDB()
         {
-            List<BankAccount> bankAccounts = new List<BankAccount>();
+            ObservableCollection<BankAccount> bankAccounts = new ObservableCollection<BankAccount>();
             using (ApplicationContext db = new ApplicationContext())
             {
                 IEnumerable<BankAccount> depos = db.DeposBankAccount.ToList();
@@ -329,6 +331,17 @@ namespace WPF_EFCore.ViewModel
                 }
             }
 
+        }
+
+
+        private ObservableCollection<T> ConverterToObsColl<T>(List<T> ts)
+        {
+            ObservableCollection<T> r = new ObservableCollection<T>();
+            foreach (var item in ts)
+            {
+                r.Add(item);
+            }
+            return r;
         }
 
         #endregion
