@@ -10,5 +10,9 @@ namespace WPF_EFCore.Model
     {
         public int DepositRate { get; set; }
 
+        public override string ToString()
+        {
+            return $"Дип.счет.  Id:{this.Id}, Счет:{this.Amount}, Ставка:{this.DepositRate}";
+        }
     }
 }

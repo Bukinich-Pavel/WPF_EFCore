@@ -48,6 +48,10 @@ namespace WPF_EFCore.Model
 
         public Client Client { get; set; }
 
+        public override string ToString()
+        {
+            return $"Недип.счет.  Id:{this.Id}, Счет:{this.Amount}";
+        }
 
         #region реализация INotifyPropertyChanged
 

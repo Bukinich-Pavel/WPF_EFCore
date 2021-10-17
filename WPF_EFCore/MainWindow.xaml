@@ -14,7 +14,7 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -29,19 +29,24 @@
         </ListView>
 
 
-        <ListView Grid.Row="0" Grid.Column="1" ItemsSource="{Binding BankAccountsView}" SelectedItem="{Binding SelectedBancAccount}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="5">
-                        <TextBlock FontSize="18" Text="{Binding Path=Amount}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+        <ListView Grid.Row="0" Grid.Column="1" FontSize="16"
+                  ItemsSource="{Binding BankAccountsView}" 
+                  SelectedItem="{Binding SelectedAccount}">
         </ListView>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" DataContext="{Binding SelectedBankAccount}">
-            <TextBlock Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
+        <StackPanel Grid.Row="1" Grid.Column="1" >
+            <WrapPanel>
+                <TextBlock Text="Со счета: "/>
+                <ComboBox ItemsSource="{Binding BankAccounts}" SelectedItem="{Binding SelectedAccFrom}"/>
+            </WrapPanel>
+            <WrapPanel>
+                <TextBlock Text="На счет: "/>
+                <ComboBox ItemsSource="{Binding BankAccounts}" SelectedItem="{Binding SelectedAccTo}"/>
+            </WrapPanel>
+            <Button  Command="{Binding ComandTransactionMoney}" Width="150" Height="30" FontSize="16">Транзакция</Button>
+            <Button  Command="{Binding ComandOpenDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="250" Height="30" FontSize="16">Открытие депозитного счета</Button>
+            <Button  Command="{Binding ComandOpenDontDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="250" Height="30" FontSize="16">Открытие недепозитного счета</Button>
+            <Button  Command="{Binding ComandCloseAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16">Закрытие счета</Button>
         </StackPanel>
-        
     </Grid>
 </Window>

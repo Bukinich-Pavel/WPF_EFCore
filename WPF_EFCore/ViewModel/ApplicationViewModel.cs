@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using WPF_EFCore.Model;
 
 namespace WPF_EFCore.ViewModel
 {
     class ApplicationViewModel : INotifyPropertyChanged
     {
+        #region селекты
 
         /// <summary>
         /// Выбранный клиент
@@ -24,12 +21,13 @@ namespace WPF_EFCore.ViewModel
             {
                 selectedClient = value;
 
-                BankAccountsView = new ObservableCollection<BankAccount>();
+                BankAccountsView = new List<BankAccount>();
+                List<BankAccount> AccTemp = new List<BankAccount>();
                 foreach (var item in BankAccounts)
                 {
-                    if (item.ClientId == value.Id) BankAccountsView.Add(item);
+                    if (item.ClientId == value.Id) AccTemp.Add(item);
                 }
-
+                BankAccountsView = AccTemp;
                 OnPropertyChanged("SelectedClient");
             }
         }
@@ -38,26 +36,174 @@ namespace WPF_EFCore.ViewModel
         /// <summary>
         /// Выбранный счет
         /// </summary>
-        private Client selectedBankAccount;
-        public Client SelectedBankAccount
+        private BankAccount selectedAccount;
+        public BankAccount SelectedAccount
         {
-            get { return selectedBankAccount; }
+            get { return selectedAccount; }
             set
             {
-                selectedBankAccount = value;
-                OnPropertyChanged("SelectedBankAccount");
+                selectedAccount = value;
+                OnPropertyChanged("SelectedAccount");
             }
         }
 
 
+        // Выбор счета снятия транзакции
+        private BankAccount selectedAccFrom;
+        public BankAccount SelectedAccFrom
+        {
+            get { return selectedAccFrom; }
+            set
+            {
+                selectedAccFrom = value;
+                OnPropertyChanged("SelectedAccFrom");
+
+            }
+        }
+
+
+        // Выбор счета зачисления транзакции
+        private BankAccount selectedAccTo;
+        public BankAccount SelectedAccTo
+        {
+            get { return selectedAccTo; }
+            set
+            {
+                selectedAccTo = value;
+                OnPropertyChanged("SelectedAccTo");
+
+            }
+        }
+
+        #endregion
+
+
+        #region команды
+
+        // Транзакция средств между счетами
+        private RelayCommand comandTransactionMoney;
+        public RelayCommand ComandTransactionMoney
+        {
+            get
+            {
+                return comandTransactionMoney ?? (comandTransactionMoney = new RelayCommand(obj =>
+                {
+                    if (SelectedAccFrom == null || SelectedAccTo == null) return;
+                    TransactionMoney(SelectedAccFrom, SelectedAccTo, 50);
+                }));
+            }
+        }
+
+
+        // Закрытие счета
+        private RelayCommand comandCloseAccount;
+        public RelayCommand ComandCloseAccount
+        {
+            get
+            {
+                return comandCloseAccount ?? (comandCloseAccount = new RelayCommand(obj =>
+                {
+                    BankAccount bankAccount = obj as BankAccount;
+                    if (bankAccount != null)
+                    {
+                        CloseAccount(bankAccount);
+                    }
+                    BankAccounts.Remove(bankAccount);
+
+                    var temp = BankAccountsView;
+                    temp.Remove(bankAccount);
+                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = temp;
+                }));
+            }
+        }
+
+
+        // Открытие депозитного счета
+        private RelayCommand comandOpenDeposAccount;
+        public RelayCommand ComandOpenDeposAccount
+        {
+            get
+            {
+                return comandOpenDeposAccount ?? (comandOpenDeposAccount = new RelayCommand(obj =>
+                {
+                    Client client = obj as Client;
+                    DeposBankAccount newAcc = new DeposBankAccount() { DepositRate = 1, ClientId = client.Id, Amount = 0 };
+
+                    using (ApplicationContext db = new ApplicationContext())
+                    {
+                        List<DeposBankAccount> deposAcc = db.DeposBankAccount.ToList();
+                        foreach (var item in deposAcc)
+                        {
+                            if (item.ClientId == client.Id) return;
+                        }
+                        db.DeposBankAccount.Add(newAcc);
+                        db.SaveChanges();
+                    }
+
+                    BankAccounts.Add(newAcc);
+
+                    var temp = BankAccountsView;
+                    temp.Add(newAcc);
+                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = temp;
+                }));
+            }
+        }
+
+
+        // Открытие недепозитного счета
+        private RelayCommand comandOpenDontDeposAccount;
+        public RelayCommand ComandOpenDontDeposAccount
+        {
+            get
+            {
+                return comandOpenDontDeposAccount ?? (comandOpenDontDeposAccount = new RelayCommand(obj =>
+                {
+                    Client client = obj as Client;
+                    DontDeposBankAccount newAcc = new DontDeposBankAccount() { ClientId = client.Id, Amount = 0 };
+
+                    using (ApplicationContext db = new ApplicationContext())
+                    {
+                        List<DontDeposBankAccount> dontdeposAcc = db.DontDeposBankAccount.ToList();
+                        foreach (var item in dontdeposAcc)
+                        {
+                            if (item.ClientId == client.Id) return;
+                        }
+                        db.DontDeposBankAccount.Add(newAcc);
+                        db.SaveChanges();
+                    }
+
+                    BankAccounts.Add(newAcc);
+
+                    var temp = BankAccountsView;
+                    temp.Add(newAcc);
+                    BankAccountsView = new List<BankAccount>();
+                    BankAccountsView = temp;
+                }));
+            }
+        }
+
+
+        #endregion
+
+
+
+        /// <summary>
+        /// Коллекция клиентов банка
+        /// </summary>
         public List<Client> Clients { get; set; }
 
+        /// <summary>
+        /// Коллекция всех счетов банка
+        /// </summary>
+        public List<BankAccount> BankAccounts { get; set; }
 
-        public ObservableCollection<BankAccount> BankAccounts { get; set; }
-
-
-        private ObservableCollection<BankAccount> bankAccountsView;
-        public ObservableCollection<BankAccount> BankAccountsView
+        /// <summary>
+        /// Коллекция счетов банка отображенных в ListBox
+        /// </summary>
+        private List<BankAccount> bankAccountsView;
+        public List<BankAccount> BankAccountsView
         {
             get { return bankAccountsView; }
             set
@@ -69,14 +215,17 @@ namespace WPF_EFCore.ViewModel
 
 
 
+        // Конструктор
         public ApplicationViewModel()
         {
-            Clients = GetClientsFromDB();
-            BankAccounts = GetBankAccountsFromDB();
-            BankAccountsView = BankAccounts;
+            Clients = GetClientsFromDB(); //получаем всех клиентов из бд
+            BankAccounts = GetBankAccountsFromDB(); //получаем все счета из бд
+            BankAccountsView = BankAccounts; //отображаем все счета в ListBox
         }
 
 
+
+        #region Private Method
 
         /// <summary>
         /// Возвращает клиентов из бд
@@ -85,7 +234,7 @@ namespace WPF_EFCore.ViewModel
         private List<Client> GetClientsFromDB()
         {
             List<Client> clients;
-            using(ApplicationContext db = new ApplicationContext())
+            using (ApplicationContext db = new ApplicationContext())
             {
                 clients = db.Clients.ToList();
             }
@@ -97,20 +246,93 @@ namespace WPF_EFCore.ViewModel
         /// Возвращает счета из бд
         /// </summary>
         /// <returns></returns>
-        private ObservableCollection<BankAccount> GetBankAccountsFromDB()
+        private List<BankAccount> GetBankAccountsFromDB()
         {
-            ObservableCollection<BankAccount> bankAccounts = new ObservableCollection<BankAccount>();
+            List<BankAccount> bankAccounts = new List<BankAccount>();
             using (ApplicationContext db = new ApplicationContext())
             {
-                var depos = db.DeposBankAccount.ToList();
-                var dontdepos = db.DontDeposBankAccount.ToList();
+                IEnumerable<BankAccount> depos = db.DeposBankAccount.ToList();
+                IEnumerable<BankAccount> dontdepos = db.DontDeposBankAccount.ToList();
+
+                //bankAccounts = depos.Union(dontdepos).ToList();
 
                 foreach (var item in depos) { bankAccounts.Add(item); }
-
                 foreach (var item in dontdepos) { bankAccounts.Add(item); }
             }
             return bankAccounts;
         }
+
+
+        /// <summary>
+        /// Транзакция между счетами
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="accFrom"></param>
+        /// <param name="accTo"></param>
+        /// <param name="sum"></param>
+        private void TransactionMoney<T, U>(T accFrom, U accTo, int sum)
+            where T : BankAccount
+            where U : BankAccount
+        {
+            if (accFrom.Amount < sum) return;
+            accFrom.Amount -= sum;
+            accTo.Amount += sum;
+
+            UpdateDbBankAccount(accFrom);
+            UpdateDbBankAccount(accTo);
+        }
+
+
+        /// <summary>
+        /// Закрытие счетов
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="acc">счет</param>
+        private void CloseAccount<T>(T acc)
+            where T : BankAccount
+        {
+            if (acc == null) return;
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (acc is DeposBankAccount)
+                {
+                    db.DeposBankAccount.Remove(acc as DeposBankAccount);
+                    db.SaveChanges();
+                }
+                else if (acc is DontDeposBankAccount)
+                {
+                    db.DontDeposBankAccount.Remove(acc as DontDeposBankAccount);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Обновляет счет в бд
+        /// </summary>
+        /// <param name="acc">Счет</param>
+        private static void UpdateDbBankAccount(BankAccount acc)
+        {
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                if (acc is DeposBankAccount)
+                {
+                    db.DeposBankAccount.Update(acc as DeposBankAccount);
+                    db.SaveChanges();
+                }
+                else if (acc is DontDeposBankAccount)
+                {
+                    db.DontDeposBankAccount.Update(acc as DontDeposBankAccount);
+                    db.SaveChanges();
+                }
+            }
+
+        }
+
+        #endregion
+
 
 
         #region реализация INotifyPropertyChanged
