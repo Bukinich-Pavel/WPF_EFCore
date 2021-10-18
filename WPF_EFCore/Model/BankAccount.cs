@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using WPF_EFCore.Interface;
 
 namespace WPF_EFCore.Model
 {
@@ -52,6 +53,7 @@ namespace WPF_EFCore.Model
         {
             return $"Недип.счет.  Id:{this.Id}, Счет:{this.Amount}";
         }
+
 
         #region реализация INotifyPropertyChanged
 

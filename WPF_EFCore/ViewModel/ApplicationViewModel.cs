@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -76,6 +77,22 @@ namespace WPF_EFCore.ViewModel
             }
         }
 
+
+        // Сумма пополнения
+        private string sumReplenishment;
+        public string SumReplenishment
+        {
+            get { return sumReplenishment; }
+            set
+            {
+                sumReplenishment = value;
+                OnPropertyChanged("SumReplenishment");
+            }
+        }
+
+
+
+        //SumReplenishment
         #endregion
 
 
@@ -92,6 +109,7 @@ namespace WPF_EFCore.ViewModel
                     if (SelectedAccFrom == null || SelectedAccTo == null) return;
                     TransactionMoney(SelectedAccFrom, SelectedAccTo, 50);
 
+
                 }));
             }
         }
@@ -105,10 +123,12 @@ namespace WPF_EFCore.ViewModel
             {
                 return comandCloseAccount ?? (comandCloseAccount = new RelayCommand(obj =>
                 {
+                    if (obj == null) return;
                     BankAccount bankAccount = obj as BankAccount;
                     if (bankAccount != null)
                     {
-                        CloseAccount(bankAccount);
+                        WorkBankAccount<BankAccount>.CloseAccount(bankAccount);
+                        //CloseAccount(bankAccount);
                     }
                     BankAccounts.Remove(bankAccount);
 
@@ -129,19 +149,10 @@ namespace WPF_EFCore.ViewModel
             {
                 return comandOpenDeposAccount ?? (comandOpenDeposAccount = new RelayCommand(obj =>
                 {
+                    if (obj == null) return;
                     Client client = obj as Client;
-                    DeposBankAccount newAcc = new DeposBankAccount() { DepositRate = 1, ClientId = client.Id, Amount = 0 };
-
-                    using (ApplicationContext db = new ApplicationContext())
-                    {
-                        List<DeposBankAccount> deposAcc = db.DeposBankAccount.ToList();
-                        foreach (var item in deposAcc)
-                        {
-                            if (item.ClientId == client.Id) return;
-                        }
-                        db.DeposBankAccount.Add(newAcc);
-                        db.SaveChanges();
-                    }
+                    DeposBankAccount newAcc = WorkBankAccount<DeposBankAccount>.OpenAccount(client);
+                    if (newAcc == null) return;
 
                     BankAccounts.Add(newAcc);
 
@@ -162,19 +173,10 @@ namespace WPF_EFCore.ViewModel
             {
                 return comandOpenDontDeposAccount ?? (comandOpenDontDeposAccount = new RelayCommand(obj =>
                 {
+                    if (obj == null) return;
                     Client client = obj as Client;
-                    DontDeposBankAccount newAcc = new DontDeposBankAccount() { ClientId = client.Id, Amount = 0 };
-
-                    using (ApplicationContext db = new ApplicationContext())
-                    {
-                        List<DontDeposBankAccount> dontdeposAcc = db.DontDeposBankAccount.ToList();
-                        foreach (var item in dontdeposAcc)
-                        {
-                            if (item.ClientId == client.Id) return;
-                        }
-                        db.DontDeposBankAccount.Add(newAcc);
-                        db.SaveChanges();
-                    }
+                    DontDeposBankAccount newAcc = WorkBankAccount<DontDeposBankAccount>.OpenAccount(client);
+                    if (newAcc == null) return;
 
                     BankAccounts.Add(newAcc);
 
@@ -182,6 +184,45 @@ namespace WPF_EFCore.ViewModel
                     temp.Add(newAcc);
                     BankAccountsView = new ObservableCollection<BankAccount>();
                     BankAccountsView = temp;
+                }));
+            }
+        }
+
+
+        // Пополнение счета
+        private RelayCommand сomandReplenishmentAccount;
+        public RelayCommand ComandReplenishmentAccount
+        {
+            get
+            {
+                return сomandReplenishmentAccount ?? (сomandReplenishmentAccount = new RelayCommand(obj =>
+                {
+
+                    int sum;
+                    try
+                    {
+                        sum = Convert.ToInt32(SumReplenishment);
+                    }
+                    catch
+                    {
+                        return;
+                    }
+
+                    if (obj is DeposBankAccount)
+                    {
+                        DeposBankAccount account = obj as DeposBankAccount;
+                        account.Replenishment(sum);
+                        UpdateDbBankAccount(account);
+                    }
+                    else if (obj is DontDeposBankAccount)
+                    {
+                        DontDeposBankAccount account = obj as DontDeposBankAccount;
+                        account.Replenishment(sum);
+                        UpdateDbBankAccount(account);
+                    }
+
+                    
+
                 }));
             }
         }
@@ -228,6 +269,7 @@ namespace WPF_EFCore.ViewModel
 
 
         #region Private Method
+
 
         /// <summary>
         /// Возвращает клиентов из бд
@@ -287,35 +329,10 @@ namespace WPF_EFCore.ViewModel
 
 
         /// <summary>
-        /// Закрытие счетов
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="acc">счет</param>
-        private void CloseAccount<T>(T acc)
-            where T : BankAccount
-        {
-            if (acc == null) return;
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                if (acc is DeposBankAccount)
-                {
-                    db.DeposBankAccount.Remove(acc as DeposBankAccount);
-                    db.SaveChanges();
-                }
-                else if (acc is DontDeposBankAccount)
-                {
-                    db.DontDeposBankAccount.Remove(acc as DontDeposBankAccount);
-                    db.SaveChanges();
-                }
-            }
-        }
-
-
-        /// <summary>
         /// Обновляет счет в бд
         /// </summary>
         /// <param name="acc">Счет</param>
-        private static void UpdateDbBankAccount(BankAccount acc)
+        private void UpdateDbBankAccount(BankAccount acc)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
@@ -331,18 +348,12 @@ namespace WPF_EFCore.ViewModel
                 }
             }
 
+            var temp = this.BankAccountsView;
+            this.BankAccountsView = new ObservableCollection<BankAccount>();
+            this.BankAccountsView = temp;
+
         }
 
-
-        private ObservableCollection<T> ConverterToObsColl<T>(List<T> ts)
-        {
-            ObservableCollection<T> r = new ObservableCollection<T>();
-            foreach (var item in ts)
-            {
-                r.Add(item);
-            }
-            return r;
-        }
 
         #endregion
 

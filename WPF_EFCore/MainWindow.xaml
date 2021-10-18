@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_EFCore"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="900" MinWidth="900" MinHeight="600">
     <Grid>
         
         <Grid.ColumnDefinitions>
@@ -34,7 +34,7 @@
                   SelectedItem="{Binding SelectedAccount}">
         </ListView>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" >
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,5,5,5" >
             <WrapPanel>
                 <TextBlock Text="Со счета: "/>
                 <ComboBox ItemsSource="{Binding BankAccounts}" SelectedItem="{Binding SelectedAccFrom}"/>
@@ -43,10 +43,22 @@
                 <TextBlock Text="На счет: "/>
                 <ComboBox ItemsSource="{Binding BankAccounts}" SelectedItem="{Binding SelectedAccTo}"/>
             </WrapPanel>
-            <Button  Command="{Binding ComandTransactionMoney}" Width="150" Height="30" FontSize="16">Транзакция</Button>
-            <Button  Command="{Binding ComandOpenDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="250" Height="30" FontSize="16">Открытие депозитного счета</Button>
-            <Button  Command="{Binding ComandOpenDontDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="250" Height="30" FontSize="16">Открытие недепозитного счета</Button>
-            <Button  Command="{Binding ComandCloseAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16">Закрытие счета</Button>
+            <WrapPanel>
+                <TextBlock Text="Сумма:"/>
+                <TextBox Width="50" Height="20"/>
+            </WrapPanel>
+            <Button  Command="{Binding ComandTransactionMoney}" Width="150" Height="30" FontSize="16" Margin="0,0,0,10">Транзакция</Button>
+            <WrapPanel Margin="0,10,0,10">
+                <TextBlock FontSize="14" Text="Открытие:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <Button  Command="{Binding ComandOpenDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="160" Height="30" FontSize="16" Margin="0,0,5,0">Депозитного счета</Button>
+                <Button  Command="{Binding ComandOpenDontDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="160" Height="30" FontSize="16">Недепозитного счета</Button>
+            </WrapPanel>
+            <Button  Command="{Binding ComandCloseAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16" Margin="0,10,0,10">Закрытие счета</Button>
+            <WrapPanel>
+                <TextBlock Text="Сумма: " VerticalAlignment="Center"/>
+                <TextBox Width="50" Height="20" Text="{Binding SumReplenishment}"/>
+                <Button  Command="{Binding ComandReplenishmentAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Пополнение счета</Button>
+            </WrapPanel>
         </StackPanel>
     </Grid>
 </Window>
