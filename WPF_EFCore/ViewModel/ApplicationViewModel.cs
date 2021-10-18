@@ -30,6 +30,7 @@ namespace WPF_EFCore.ViewModel
                     if (item.ClientId == value.Id) AccTemp.Add(item);
                 }
                 BankAccountsView = AccTemp;
+                ForSelectTransaction = AccTemp;
                 OnPropertyChanged("SelectedClient");
             }
         }
@@ -78,6 +79,34 @@ namespace WPF_EFCore.ViewModel
         }
 
 
+        // Выбор клиента снятия транзакции
+        private Client selectedClientFrom;
+        public Client SelectedClientFrom
+        {
+            get { return selectedClientFrom; }
+            set
+            {
+                selectedClientFrom = value;
+                OnPropertyChanged("SelectedClientFrom");
+
+            }
+        }
+
+
+        // Выбор клиента зачисления транзакции
+        private Client selectedClientTo;
+        public Client SelectedClientTo
+        {
+            get { return selectedClientTo; }
+            set
+            {
+                selectedClientTo = value;
+                OnPropertyChanged("SelectedClientTo");
+
+            }
+        }
+
+
         // Сумма пополнения
         private string sumReplenishment;
         public string SumReplenishment
@@ -91,12 +120,36 @@ namespace WPF_EFCore.ViewModel
         }
 
 
+        // Сумма пополнения
+        private string sumTransactionBetweenClients;
+        public string SumTransactionBetweenClients
+        {
+            get { return sumTransactionBetweenClients; }
+            set
+            {
+                sumTransactionBetweenClients = value;
+                OnPropertyChanged("SumTransactionBetweenClients");
+            }
+        }
 
-        //SumReplenishment
+
+        // Сумма пополнения
+        private string sumTransactionBetweenAccounts;
+        public string SumTransactionBetweenAccounts
+        {
+            get { return sumTransactionBetweenAccounts; }
+            set
+            {
+                sumTransactionBetweenAccounts = value;
+                OnPropertyChanged("SumTransactionBetweenAccounts");
+            }
+        }
+
+
         #endregion
 
 
-        #region команды
+        #region Команды
 
         // Транзакция средств между счетами
         private RelayCommand comandTransactionMoney;
@@ -106,9 +159,50 @@ namespace WPF_EFCore.ViewModel
             {
                 return comandTransactionMoney ?? (comandTransactionMoney = new RelayCommand(obj =>
                 {
+                    int sum;
+                    try
+                    {
+                        sum = Convert.ToInt32(SumTransactionBetweenAccounts);
+                    }
+                    catch 
+                    {
+                        return;
+                    }
                     if (SelectedAccFrom == null || SelectedAccTo == null) return;
-                    TransactionMoney(SelectedAccFrom, SelectedAccTo, 50);
+                    TransactionMoney(SelectedAccFrom, SelectedAccTo, sum);
 
+
+                }));
+            }
+        }
+
+
+        // Транзакция средств между клиентами
+        private RelayCommand сomandTransactionBetweenClients;
+        public RelayCommand ComandTransactionBetweenClients
+        {
+            get
+            {
+                return сomandTransactionBetweenClients ?? (сomandTransactionBetweenClients = new RelayCommand(obj =>
+                {
+                    int sum;
+                    try
+                    {
+                        sum = Convert.ToInt32(SumTransactionBetweenClients);
+                    }
+                    catch 
+                    {
+                        return;
+                    }
+
+
+                    if (SelectedClientFrom == null || SelectedClientTo == null) return;
+                    SelectedClientFrom.Transaction(SelectedClientTo, sum);
+
+                    BankAccounts = GetBankAccountsFromDB(); 
+                    var temp = this.BankAccountsView;
+                    this.BankAccountsView = new ObservableCollection<BankAccount>();
+                    this.BankAccountsView = BankAccounts;
 
                 }));
             }
@@ -257,6 +351,20 @@ namespace WPF_EFCore.ViewModel
         }
 
 
+        private ObservableCollection<BankAccount> forSelectTransaction;
+        public ObservableCollection<BankAccount> ForSelectTransaction
+        {
+            get { return forSelectTransaction; }
+            set
+            {
+                forSelectTransaction = value;
+                OnPropertyChanged("ForSelectTransaction");
+            }
+        }
+
+
+
+
 
         // Конструктор
         public ApplicationViewModel()
@@ -264,6 +372,7 @@ namespace WPF_EFCore.ViewModel
             Clients = GetClientsFromDB(); //получаем всех клиентов из бд
             BankAccounts = GetBankAccountsFromDB(); //получаем все счета из бд
             BankAccountsView = BankAccounts; //отображаем все счета в ListBox
+            ForSelectTransaction = new ObservableCollection<BankAccount>();
         }
 
 
@@ -290,7 +399,7 @@ namespace WPF_EFCore.ViewModel
         /// Возвращает счета из бд
         /// </summary>
         /// <returns></returns>
-        private ObservableCollection<BankAccount> GetBankAccountsFromDB()
+        public static ObservableCollection<BankAccount> GetBankAccountsFromDB()
         {
             ObservableCollection<BankAccount> bankAccounts = new ObservableCollection<BankAccount>();
             using (ApplicationContext db = new ApplicationContext())
