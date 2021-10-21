@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="900" MinWidth="900" MinHeight="600">
     <Grid>
-        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -42,6 +42,15 @@
                 <TextBox Width="50" Height="20" Text="{Binding SumTransactionBetweenClients}"/>
             </WrapPanel>
             <Button  Command="{Binding ComandTransactionBetweenClients}" Width="150" Height="30" FontSize="16" Margin="0,0,0,10">Транзакция</Button>
+
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Имя нового клиента:" VerticalAlignment="Center"></TextBlock>
+                <TextBox Text="{Binding NameNewClient}" Width="100" Height="25" Margin="0,0,20,0"></TextBox>
+                <Button Command="{Binding ComandAddClient}" CommandParameter="{Binding NameNewClient}"  Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Добавить клиента</Button>
+            </WrapPanel>
+
+            <Button Command="{Binding CommandDeleteClient}" CommandParameter="{Binding SelectedClient}" Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Удалить клиента</Button>
+
         </StackPanel>
 
         <ListView Grid.Row="0" Grid.Column="1" FontSize="16"

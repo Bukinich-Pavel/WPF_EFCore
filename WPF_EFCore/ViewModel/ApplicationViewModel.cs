@@ -22,7 +22,7 @@ namespace WPF_EFCore.ViewModel
             set
             {
                 selectedClient = value;
-
+                if (value == null) return;
                 BankAccountsView = new ObservableCollection<BankAccount>();
                 ObservableCollection<BankAccount> AccTemp = new ObservableCollection<BankAccount>();
                 foreach (var item in BankAccounts)
@@ -146,9 +146,23 @@ namespace WPF_EFCore.ViewModel
         }
 
 
+        // Имя нового клиента
+        private string nameNewClient;
+        public string NameNewClient
+        {
+            get { return nameNewClient; }
+            set
+            {
+                nameNewClient = value;
+                OnPropertyChanged("NameNewClient");
+            }
+        }
+
+
         #endregion
 
 
+        
         #region Команды
 
         // Транзакция средств между счетами
@@ -322,6 +336,53 @@ namespace WPF_EFCore.ViewModel
         }
 
 
+        // Добавление нового клиента
+        private RelayCommand comandAddClient;
+        public RelayCommand ComandAddClient
+        {
+            get
+            {
+                return comandAddClient ?? (comandAddClient = new RelayCommand(obj =>
+                {
+                    if (obj == null) return;
+                    string name = obj as string;
+
+                    Client newClient = new Client() { Name = name };
+
+                    using (ApplicationContext db = new ApplicationContext())
+                    {
+                        db.Clients.Add(newClient);
+                        db.SaveChanges();
+                    }
+                    Clients.Add(newClient);
+                }));
+            }
+        }
+
+
+        // Удаление клиента
+        private RelayCommand commandDeleteClient;
+        public RelayCommand CommandDeleteClient
+        {
+            get
+            {
+                return commandDeleteClient ?? (commandDeleteClient = new RelayCommand(obj =>
+                {
+                    if (obj == null) return;
+                    Client client = obj as Client;
+
+                    using (ApplicationContext db = new ApplicationContext())
+                    {
+                        db.Clients.Remove(client);
+                        db.SaveChanges();
+                    }
+                    Clients.Remove(client);
+                }));
+            }
+        }
+
+
+
         #endregion
 
 
@@ -329,7 +390,16 @@ namespace WPF_EFCore.ViewModel
         /// <summary>
         /// Коллекция клиентов банка
         /// </summary>
-        public List<Client> Clients { get; set; }
+        private ObservableCollection<Client> сlients;
+        public ObservableCollection<Client> Clients
+        {
+            get { return сlients; }
+            set
+            {
+                сlients = value;
+                OnPropertyChanged("Clients");
+            }
+        }
 
         /// <summary>
         /// Коллекция всех счетов банка
@@ -384,13 +454,20 @@ namespace WPF_EFCore.ViewModel
         /// Возвращает клиентов из бд
         /// </summary>
         /// <returns></returns>
-        private List<Client> GetClientsFromDB()
+        private ObservableCollection<Client> GetClientsFromDB()
         {
-            List<Client> clients;
+            ObservableCollection<Client> clients;
+            List<Client> temp;
             using (ApplicationContext db = new ApplicationContext())
             {
-                clients = db.Clients.ToList();
+                temp = db.Clients.ToList();
             }
+            clients = new ObservableCollection<Client>();
+            foreach (var item in temp)
+            {
+                clients.Add(item);
+            }
+
             return clients;
         }
 
