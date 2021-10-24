@@ -11,6 +11,9 @@ namespace WPF_EFCore.Model
 {
     public class Client : ITransaction<Client>
     {
+        public static event Action<string, string> EventClientTransaction;
+
+
         public int Id { get; set; }
         public string Name { get; set; }
         public int? DepAccId { get; set; }
@@ -48,8 +51,11 @@ namespace WPF_EFCore.Model
                 {
                     if (item.Amount >= sum)
                     {
+                        if (accountsAnotherClient == null || accountsAnotherClient.Count == 0) return;
                         item.Amount -= sum;
                         accountsAnotherClient[0].Amount += sum;
+
+                        EventClientTransaction?.Invoke($"{this.Name}", $"Транзакция средств клиенту {client} на счет: \"{accountsAnotherClient[0]}\"");
 
                         UpdateDBBankAccount(db, item);
                         UpdateDBBankAccount(db, accountsAnotherClient[0]);

@@ -16,12 +16,14 @@ namespace WPF_EFCore.Model
             return $"Дип.счет.  Id:{this.Id}, Счет:{this.Amount}, Ставка:{this.DepositRate}";
         }
 
+
         // конструктор
         public DeposBankAccount()
         {
             DepositRate = 1;
             Amount = 0;
         }
+
 
         // пополнение счета
         public DeposBankAccount Replenishment(int sum)

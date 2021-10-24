@@ -11,6 +11,9 @@ namespace WPF_EFCore.Model
 {
     public class BankAccount : INotifyPropertyChanged
     {
+        public static event Action<string, string> EventAccount;
+
+
         private int id;
         public int Id
         {
@@ -29,8 +32,14 @@ namespace WPF_EFCore.Model
             get { return amount; }
             set
             {
+                if (value == 0) return;
+                int sum = value - amount;
                 amount = value;
                 OnPropertyChanged("Amount");
+
+                Client client = GetClientByAcc();
+                EventAccount?.Invoke($"{client}", $"Пополнение счета: \"{this}\" на {sum}");
+
             }
         }
 
@@ -65,6 +74,25 @@ namespace WPF_EFCore.Model
         }
 
         #endregion
+
+        protected Client GetClientByAcc()
+        {
+            Client client = new Client();
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                List<Client> clients = db.Clients.ToList();
+                foreach (var item in clients)
+                {
+                    if (item.Id == this.ClientId)
+                    {
+                        client = item;
+                        break;
+                    }
+                }
+            }
+
+            return client;
+        }
 
     }
 }

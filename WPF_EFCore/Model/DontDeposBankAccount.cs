@@ -14,6 +14,8 @@ namespace WPF_EFCore.Model
             Amount = 0;
         }
 
+
+        // Пополнение счета
         public DontDeposBankAccount Replenishment(int sum)
         {
             this.Amount += sum;

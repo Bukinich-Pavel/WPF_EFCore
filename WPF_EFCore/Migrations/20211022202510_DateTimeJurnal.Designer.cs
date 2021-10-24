@@ -10,8 +10,8 @@ using WPF_EFCore;
 namespace WPF_EFCore.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20211015195408_B")]
-    partial class B
+    [Migration("20211022202510_DateTimeJurnal")]
+    partial class DateTimeJurnal
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -83,6 +83,27 @@ namespace WPF_EFCore.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("DontDeposBankAccount");
+                });
+
+            modelBuilder.Entity("WPF_EFCore.Model.Jurnal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("DateTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Jurnal");
                 });
 
             modelBuilder.Entity("WPF_EFCore.Model.DeposBankAccount", b =>

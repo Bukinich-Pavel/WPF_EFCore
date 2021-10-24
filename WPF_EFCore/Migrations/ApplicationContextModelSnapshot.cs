@@ -83,6 +83,27 @@ namespace WPF_EFCore.Migrations
                     b.ToTable("DontDeposBankAccount");
                 });
 
+            modelBuilder.Entity("WPF_EFCore.Model.Jurnal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("DateTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Jurnal");
+                });
+
             modelBuilder.Entity("WPF_EFCore.Model.DeposBankAccount", b =>
                 {
                     b.HasOne("WPF_EFCore.Model.Client", "Client")

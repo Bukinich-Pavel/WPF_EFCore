@@ -14,6 +14,7 @@ namespace WPF_EFCore
         public DbSet<Client> Clients { get; set; }
         public DbSet<DeposBankAccount> DeposBankAccount { get; set; }
         public DbSet<DontDeposBankAccount> DontDeposBankAccount { get; set; }
+        public DbSet<Jurnal> Jurnal { get; set; }
 
         public ApplicationContext()
         {
@@ -22,7 +23,7 @@ namespace WPF_EFCore
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=WPF_EfCore1;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=WPF_EfCore;Trusted_Connection=True;");
         }
     }
 }

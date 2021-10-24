@@ -1,0 +1,21 @@
+﻿<Window x:Class="WPF_EFCore.View.JurnalView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF_EFCore.View"
+        mc:Ignorable="d"
+        Title="JurnalView" Height="450" Width="800">
+    <Grid>
+        <ListView ItemsSource="{Binding MessageFromJurnal}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Дата/Время" DisplayMemberBinding="{Binding Path=DateTime}" />
+                    <GridViewColumn Header="Имя" DisplayMemberBinding="{Binding Path=Name}" />
+                    <GridViewColumn Header="Сообщение" DisplayMemberBinding="{Binding Path=Message}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+    </Grid>
+</Window>

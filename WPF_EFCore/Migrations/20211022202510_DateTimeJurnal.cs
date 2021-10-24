@@ -2,12 +2,39 @@
 
 namespace WPF_EFCore.Migrations
 {
-    public partial class Ba : Migration
+    public partial class DateTimeJurnal : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "BankAccount");
+            migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DepAccId = table.Column<int>(type: "int", nullable: true),
+                    DontDepAccId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Jurnal",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateTime = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Jurnal", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "DeposBankAccount",
@@ -15,8 +42,8 @@ namespace WPF_EFCore.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Amount = table.Column<int>(type: "int", nullable: false),
                     DepositRate = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -69,32 +96,11 @@ namespace WPF_EFCore.Migrations
             migrationBuilder.DropTable(
                 name: "DontDeposBankAccount");
 
-            migrationBuilder.CreateTable(
-                name: "BankAccount",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    ClientId = table.Column<int>(type: "int", nullable: false),
-                    DepAcc = table.Column<bool>(type: "bit", nullable: false),
-                    DepositRate = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BankAccount", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_BankAccount_Clients_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "Clients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.DropTable(
+                name: "Jurnal");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_BankAccount_ClientId",
-                table: "BankAccount",
-                column: "ClientId");
+            migrationBuilder.DropTable(
+                name: "Clients");
         }
     }
 }

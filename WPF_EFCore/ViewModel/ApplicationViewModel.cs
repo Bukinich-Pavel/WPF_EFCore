@@ -5,11 +5,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using WPF_EFCore.Model;
+using WPF_EFCore.View;
 
 namespace WPF_EFCore.ViewModel
 {
     class ApplicationViewModel : INotifyPropertyChanged
     {
+        public static event Action<string, string> Events;
+
+
         #region селекты
 
         /// <summary>
@@ -185,7 +189,22 @@ namespace WPF_EFCore.ViewModel
                     if (SelectedAccFrom == null || SelectedAccTo == null) return;
                     TransactionMoney(SelectedAccFrom, SelectedAccTo, sum);
 
+                    Client client = new Client();
+                    using (ApplicationContext db = new ApplicationContext())
+                    {
+                        List<Client> clients = db.Clients.ToList();
+                        foreach (var item in clients)
+                        {
+                            if (item.Id == SelectedAccFrom.ClientId)
+                            {
+                                client = item;
+                                break;
+                            }
+                        }
+                    }
+                    Events?.Invoke($"{client}", $"Транзакция средств со счета: \"{SelectedAccFrom}\" на счет \"{SelectedAccTo}\"");
 
+                    SumTransactionBetweenAccounts = null;
                 }));
             }
         }
@@ -218,6 +237,7 @@ namespace WPF_EFCore.ViewModel
                     this.BankAccountsView = new ObservableCollection<BankAccount>();
                     this.BankAccountsView = BankAccounts;
 
+                    SumTransactionBetweenClients = null;
                 }));
             }
         }
@@ -236,8 +256,23 @@ namespace WPF_EFCore.ViewModel
                     if (bankAccount != null)
                     {
                         WorkBankAccount<BankAccount>.CloseAccount(bankAccount);
-                        //CloseAccount(bankAccount);
+
+                        Client client = new Client();
+                        using (ApplicationContext db = new ApplicationContext())
+                        {
+                            List<Client> clients = db.Clients.ToList();
+                            foreach (var item in clients)
+                            {
+                                if (item.Id == bankAccount.ClientId)
+                                {
+                                    client = item;
+                                    break;
+                                }
+                            }
+                        }
+                        Events?.Invoke($"{client}", $"Закрытие счета \"{bankAccount}\" клиента {client}");
                     }
+
                     BankAccounts.Remove(bankAccount);
 
                     var temp = BankAccountsView;
@@ -262,6 +297,7 @@ namespace WPF_EFCore.ViewModel
                     DeposBankAccount newAcc = WorkBankAccount<DeposBankAccount>.OpenAccount(client);
                     if (newAcc == null) return;
 
+                    Events?.Invoke($"{client}", $"Открытие депозитного счета \"{newAcc}\" для клиента {client}");
                     BankAccounts.Add(newAcc);
 
                     var temp = BankAccountsView;
@@ -286,6 +322,7 @@ namespace WPF_EFCore.ViewModel
                     DontDeposBankAccount newAcc = WorkBankAccount<DontDeposBankAccount>.OpenAccount(client);
                     if (newAcc == null) return;
 
+                    Events?.Invoke($"{client}", $"Открытие недепозитного счета \"{newAcc}\" для клиента {client}");
                     BankAccounts.Add(newAcc);
 
                     var temp = BankAccountsView;
@@ -329,7 +366,7 @@ namespace WPF_EFCore.ViewModel
                         UpdateDbBankAccount(account);
                     }
 
-                    
+                    SumReplenishment = null;
 
                 }));
             }
@@ -354,7 +391,11 @@ namespace WPF_EFCore.ViewModel
                         db.Clients.Add(newClient);
                         db.SaveChanges();
                     }
+
+                    Events?.Invoke($"{newClient}", $"Создание нового клиента \"{newClient}\"");
                     Clients.Add(newClient);
+
+                    NameNewClient = null;
                 }));
             }
         }
@@ -376,11 +417,29 @@ namespace WPF_EFCore.ViewModel
                         db.Clients.Remove(client);
                         db.SaveChanges();
                     }
+
+                    Events?.Invoke($"{client}", $"Удаление клиента \"{client}\"");
                     Clients.Remove(client);
+
                 }));
             }
         }
 
+
+
+        //
+        private RelayCommand commandOpenJurnalView;
+        public RelayCommand CommandOpenJurnalView
+        {
+            get
+            {
+                return commandOpenJurnalView ?? (commandOpenJurnalView = new RelayCommand(obj =>
+                {
+                    JurnalView jurnalView = new JurnalView();
+                    jurnalView.Show();
+                }));
+            }
+        }
 
 
         #endregion
@@ -434,8 +493,6 @@ namespace WPF_EFCore.ViewModel
 
 
 
-
-
         // Конструктор
         public ApplicationViewModel()
         {
@@ -443,6 +500,7 @@ namespace WPF_EFCore.ViewModel
             BankAccounts = GetBankAccountsFromDB(); //получаем все счета из бд
             BankAccountsView = BankAccounts; //отображаем все счета в ListBox
             ForSelectTransaction = new ObservableCollection<BankAccount>();
+            ConstructorJurnal constructorJurnal = new ConstructorJurnal();
         }
 
 

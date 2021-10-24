@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_EFCore"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900" MinWidth="900" MinHeight="600">
+        Title="MainWindow" Height="800" Width="1000" MinWidth="900" MinHeight="600">
     <Grid>
 
         <Grid.ColumnDefinitions>
@@ -41,16 +41,17 @@
                 <TextBlock Text="Сумма:"/>
                 <TextBox Width="50" Height="20" Text="{Binding SumTransactionBetweenClients}"/>
             </WrapPanel>
-            <Button  Command="{Binding ComandTransactionBetweenClients}" Width="150" Height="30" FontSize="16" Margin="0,0,0,10">Транзакция</Button>
+            <Button  Command="{Binding ComandTransactionBetweenClients}" Width="150" Height="30" FontSize="16" Margin="0,0,0,20">Транзакция</Button>
 
-            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,20">
                 <TextBlock Text="Имя нового клиента:" VerticalAlignment="Center"></TextBlock>
                 <TextBox Text="{Binding NameNewClient}" Width="100" Height="25" Margin="0,0,20,0"></TextBox>
                 <Button Command="{Binding ComandAddClient}" CommandParameter="{Binding NameNewClient}"  Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Добавить клиента</Button>
             </WrapPanel>
 
-            <Button Command="{Binding CommandDeleteClient}" CommandParameter="{Binding SelectedClient}" Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Удалить клиента</Button>
+            <Button Command="{Binding CommandDeleteClient}" CommandParameter="{Binding SelectedClient}" Width="150" Height="30" FontSize="16" Margin="20,20,0,22">Удалить клиента</Button>
 
+            <Button Command="{Binding CommandOpenJurnalView}" Width="160" Height="30" FontSize="16" Margin="20,20,0,22">Открыть сообщения</Button>
         </StackPanel>
 
         <ListView Grid.Row="0" Grid.Column="1" FontSize="16"
@@ -71,14 +72,14 @@
                 <TextBlock Text="Сумма:"/>
                 <TextBox Width="50" Height="20" Text="{Binding SumTransactionBetweenAccounts}"/>
             </WrapPanel>
-            <Button  Command="{Binding ComandTransactionMoney}" Width="150" Height="30" FontSize="16" Margin="0,0,0,10">Транзакция</Button>
-            <WrapPanel Margin="0,10,0,10">
+            <Button  Command="{Binding ComandTransactionMoney}" Width="150" Height="30" FontSize="16" Margin="0,0,0,20">Транзакция</Button>
+            <WrapPanel Margin="0,20,0,20" HorizontalAlignment="Center">
                 <TextBlock FontSize="14" Text="Открытие:" VerticalAlignment="Center" Margin="0,0,5,0"/>
                 <Button  Command="{Binding ComandOpenDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="160" Height="30" FontSize="16" Margin="0,0,5,0">Депозитного счета</Button>
                 <Button  Command="{Binding ComandOpenDontDeposAccount}" CommandParameter="{Binding SelectedClient}" Width="160" Height="30" FontSize="16">Недепозитного счета</Button>
             </WrapPanel>
-            <Button  Command="{Binding ComandCloseAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16" Margin="0,10,0,10">Закрытие счета</Button>
-            <WrapPanel>
+            <Button  Command="{Binding ComandCloseAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16" Margin="0,20,0,20">Закрытие счета</Button>
+            <WrapPanel HorizontalAlignment="Center" Margin="0,20,0,20">
                 <TextBlock Text="Сумма: " VerticalAlignment="Center"/>
                 <TextBox Width="50" Height="20" Text="{Binding SumReplenishment}"/>
                 <Button  Command="{Binding ComandReplenishmentAccount}" CommandParameter="{Binding SelectedAccount}" Width="150" Height="30" FontSize="16" Margin="20,10,0,10">Пополнение счета</Button>
